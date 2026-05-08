@@ -9,6 +9,23 @@
   <img width="400" height="22" alt="Onigiri divider" src="https://github.com/user-attachments/assets/77958660-41fd-4a43-85df-6c17cda02958" />
 </div>
 
+### Download this build
+
+This repository includes an installable Onigiri build with closeable image/Mochi popups and a shorter notification display time.
+
+**Download:** [Onigiri-Updated-closeable-notifications.ankiaddon](https://github.com/QMApplicationUnofficial/Onigiri-Updated/raw/main/Onigiri-Updated-closeable-notifications.ankiaddon)
+
+### Install in Anki
+
+1. Download the `.ankiaddon` file above.
+2. Open Anki.
+3. Go to `Tools` -> `Add-ons`.
+4. Click `Install from file...`.
+5. Select `Onigiri-Updated-closeable-notifications.ankiaddon`.
+6. Restart Anki.
+
+If you already have the original Onigiri add-on installed, Anki may treat this as the same add-on because it uses the same package ID, `1011095603`. That is expected. Let Anki replace/update it, or remove the old Onigiri first from `Tools` -> `Add-ons`.
+
 Onigiri is an **experimental add-on** that replaces the standard Anki interface with a modern, highly customizable, and personalized dashboard, transforming how Anki looks completely, a way to keep you motivated to study your cards everyday. 
 
 Onigiri (お握り), also known as omusubi (おむすび) or rice ball (🍙), is a traditional Japanese recipe rich in carbohydrates, which are essential to provide energy, so you can study your Anki cards! This is the intention of Onigiri, to give you the proper motivation to study your cards with a beautiful new layout to Anki (暗記), an extra carbohydrate to give you that boost to study. 
