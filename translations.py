@@ -5214,6 +5214,10 @@ TRANSLATIONS = {
     },
 }
 
+def _humanize_key(key: str) -> str:
+    return str(key).replace("_", " ").replace("-", " ").strip().title()
+
+
 def tr(key: str, default: str = None):
     try:
         lang = mw.pm.profile.get('onigiri_language', 'en')
@@ -5221,4 +5225,4 @@ def tr(key: str, default: str = None):
         lang = 'en'
     if lang not in TRANSLATIONS:
         lang = 'en'
-    return TRANSLATIONS[lang].get(key, default or key)
+    return TRANSLATIONS[lang].get(key, default if default is not None else _humanize_key(key))

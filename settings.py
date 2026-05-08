@@ -9958,7 +9958,7 @@ class SettingsDialog(QDialog):
                         gallery['selected'] = ""
                         if gallery.get('path_input'): 
                             gallery['path_input'].setText("")
-                            gallery['path_input'].setPlaceholderText("No item selected")
+                            gallery['path_input'].setPlaceholderText(tr("no_item_selected"))
                     else:
                         gallery['selected'] = filename
                         if gallery.get('path_input'): 
@@ -10001,7 +10001,12 @@ class SettingsDialog(QDialog):
         dest_path = os.path.join(self.addon_path, gallery['folder'], filename)
         
         try:
-            shutil.copy(filepath, dest_path)
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+            if os.path.abspath(filepath) != os.path.abspath(dest_path):
+                shutil.copy(filepath, dest_path)
+            gallery['selected'] = filename
+            if gallery.get('path_input'):
+                gallery['path_input'].setText(filename)
             self._refresh_gallery(key)
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Could not copy file: {e}")

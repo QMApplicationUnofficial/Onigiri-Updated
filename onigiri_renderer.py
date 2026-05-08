@@ -13,6 +13,7 @@ from .templates import custom_body_template
 from .translations import tr
 import copy
 import re
+from urllib.parse import quote
 
 def process_tr_markers(html_str: str) -> str:
     """
@@ -198,16 +199,21 @@ def _generate_action_icons_css(conf: dict, addon_package: str) -> str:
 
 # --- Helper functions (copied from patcher.py for self-containment) ---
 
-def _get_profile_pic_html(user_name: str, addon_package: str, css_class: str = "profile-pic") -> str:    
+def _addon_file_url(addon_package: str, *parts: str) -> str:
+    encoded_parts = "/".join(quote(str(part), safe="") for part in parts if part)
+    return f"/_addons/{quote(str(addon_package), safe='')}/{encoded_parts}"
+
+
+def _get_profile_pic_html(user_name: str, addon_package: str, css_class: str = "profile-pic") -> str:
     profile_pic_filename = mw.col.conf.get("modern_menu_profile_picture", "")
     if profile_pic_filename and os.path.exists(os.path.join(mw.addonManager.addonsFolder(addon_package), "user_files", "profile", profile_pic_filename)):
-        pic_url = f"/_addons/{addon_package}/user_files/profile/{profile_pic_filename}"
-        return f'<img src="{pic_url}" class="{css_class}">'
+        pic_url = _addon_file_url(addon_package, "user_files", "profile", profile_pic_filename)
+        return f'<img src="{html.escape(pic_url, quote=True)}" class="{html.escape(css_class, quote=True)}" alt="">'
     else:
         # Use default profile picture when none is selected or file doesn't exist
         default_pic = "onigiri-san.png"
-        pic_url = f"/_addons/{addon_package}/system_files/profile_default/{default_pic}"
-        return f'<img src="{pic_url}" class="{css_class}">'
+        pic_url = _addon_file_url(addon_package, "system_files", "profile_default", default_pic)
+        return f'<img src="{html.escape(pic_url, quote=True)}" class="{html.escape(css_class, quote=True)}" alt="">'
 
 def _get_onigiri_stat_card_html(label: str, value: str, widget_id: str) -> str:
     return f"""<div class="stat-card {widget_id}-card"><h3>{label}</h3><p>{value}</p></div>"""
@@ -1103,11 +1109,11 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
 
     if profile_bg_mode == "image":
         if profile_bg_image and os.path.exists(os.path.join(mw.addonManager.addonsFolder(addon_package), "user_files", "profile_bg", profile_bg_image)):
-            bg_image_url = f"/_addons/{addon_package}/user_files/profile_bg/{profile_bg_image}"
+            bg_image_url = _addon_file_url(addon_package, "user_files", "profile_bg", profile_bg_image)
         else:
             # Use default background image when none is selected or file doesn't exist
-            bg_image_url = f"/_addons/{addon_package}/system_files/profile_default/onigiri-bg.png"
-        bg_style_str = f"background-image: url('{bg_image_url}'); background-size: cover; background-position: center;"
+            bg_image_url = _addon_file_url(addon_package, "system_files", "profile_default", "onigiri-bg.png")
+        bg_style_str = f"background-image: url('{html.escape(bg_image_url, quote=True)}'); background-size: cover; background-position: center;"
         bg_class_str = "with-image-bg"
     elif profile_bg_mode == "custom":
         bg_style_str = "background-color: var(--profile-bg-custom-color);"

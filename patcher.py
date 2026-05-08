@@ -20,7 +20,6 @@ from aqt.utils import showInfo, tooltip
 from aqt.webview import AnkiWebView
 from aqt.deckbrowser import DeckBrowser
 from aqt.main import MainWebView
-from aqt.utils import tr
 from aqt.overview import Overview
 from aqt.reviewer import Reviewer
 import os
@@ -33,14 +32,15 @@ import random
 import math
 import webbrowser
 from datetime import datetime, timedelta
-from urllib.parse import urlparse, parse_qs, urlencode, unquote, quote_plus
+from urllib.parse import urlparse, parse_qs, urlencode, unquote, quote_plus, quote
 from typing import Optional, Dict, List, Tuple, Any, Callable, Union
 from . import config
 from . import onigiri_renderer
 from . import deck_tree_updater
 from .gamification import restaurant_level
 from . import settings, heatmap, fonts, gamification_settings
-from .translations import tr as tr_at
+from .translations import tr
+tr_at = tr
 from .gamification.gamification import get_gamification_manager
 from .fonts import get_all_fonts
 from . import deck_tree_updater
@@ -186,17 +186,22 @@ def get_sync_status():
         return 'none'
 
 
-def _get_profile_pic_html(user_name: str, addon_package: str, css_class: str = "profile-pic") -> str:    
+def _addon_file_url(addon_package: str, *parts: str) -> str:
+    encoded_parts = "/".join(quote(str(part), safe="") for part in parts if part)
+    return f"/_addons/{quote(str(addon_package), safe='')}/{encoded_parts}"
+
+
+def _get_profile_pic_html(user_name: str, addon_package: str, css_class: str = "profile-pic") -> str:
     """Generates profile picture HTML (img or default) based on user settings."""
     profile_pic_filename = mw.col.conf.get("modern_menu_profile_picture", "")
     if profile_pic_filename and os.path.exists(os.path.join(mw.addonManager.addonsFolder(addon_package), "user_files", "profile", profile_pic_filename)):
-        pic_url = f"/_addons/{addon_package}/user_files/profile/{profile_pic_filename}"
-        return f'<img src="{pic_url}" class="{css_class}">'
+        pic_url = _addon_file_url(addon_package, "user_files", "profile", profile_pic_filename)
+        return f'<img src="{html.escape(pic_url, quote=True)}" class="{html.escape(css_class, quote=True)}" alt="">'
     else:
         # Use default profile picture when none is selected or file doesn't exist
         default_pic = "onigiri-san.png"
-        pic_url = f"/_addons/{addon_package}/system_files/profile_default/{default_pic}"
-        return f'<img src="{pic_url}" class="{css_class}">'
+        pic_url = _addon_file_url(addon_package, "system_files", "profile_default", default_pic)
+        return f'<img src="{html.escape(pic_url, quote=True)}" class="{html.escape(css_class, quote=True)}" alt="">'
 
 
 def take_control_of_deck_browser_hook():
@@ -574,7 +579,7 @@ def _get_theme_colors_html(mode, conf):
             <div class="color-item">
                 <div class="color-swatch" style="background-color: {hex_val};"></div>
                 <div class="color-info">
-                    <span class="color-name">{info['label']}</span>
+                    <span class="color-name">{html.escape(tr(info['label']), quote=False)}</span>
                     <span class="color-code">{hex_val.upper()}</span>
                 </div>
             </div>
@@ -823,11 +828,11 @@ def _get_profile_header_html(conf, addon_package):
     if bg_mode == "image":
         bg_image_file = mw.col.conf.get("modern_menu_profile_bg_image", "")
         if bg_image_file and os.path.exists(os.path.join(mw.addonManager.addonsFolder(addon_package), "user_files", "profile_bg", bg_image_file)):
-            bg_url = f"/_addons/{addon_package}/user_files/profile_bg/{bg_image_file}"
+            bg_url = _addon_file_url(addon_package, "user_files", "profile_bg", bg_image_file)
         else:
             # Use default background image when none is selected or file doesn't exist
-            bg_url = f"/_addons/{addon_package}/system_files/profile_default/onigiri-bg.png"
-        bg_style = f"background-image: url('{bg_url}'); background-size: cover; background-position: center;"
+            bg_url = _addon_file_url(addon_package, "system_files", "profile_default", "onigiri-bg.png")
+        bg_style = f"background-image: url('{html.escape(bg_url, quote=True)}'); background-size: cover; background-position: center;"
     elif bg_mode == "custom":
         light_color = mw.col.conf.get("modern_menu_profile_bg_color_light", "#EEEEEE")
         dark_color = mw.col.conf.get("modern_menu_profile_bg_color_dark", "#3C3C3C")
@@ -1549,11 +1554,11 @@ def patch_congrats_page():
 
             if profile_bg_mode == "image":
                 if profile_bg_image and os.path.exists(os.path.join(mw.addonManager.addonsFolder(addon_package), "user_files", "profile_bg", profile_bg_image)):
-                    bg_image_url = f"/_addons/{addon_package}/user_files/profile_bg/{profile_bg_image}"
+                    bg_image_url = _addon_file_url(addon_package, "user_files", "profile_bg", profile_bg_image)
                 else:
                     # Use default background image when none is selected or file doesn't exist
-                    bg_image_url = f"/_addons/{addon_package}/system_files/profile_default/onigiri-bg.png"
-                bg_style_str = f"background-image: url('{bg_image_url}'); background-size: cover; background-position: center;"
+                    bg_image_url = _addon_file_url(addon_package, "system_files", "profile_default", "onigiri-bg.png")
+                bg_style_str = f"background-image: url('{html.escape(bg_image_url, quote=True)}'); background-size: cover; background-position: center;"
                 bg_class_str = "with-image-bg"
             elif profile_bg_mode == "custom":
                 bg_style_str = "background-color: var(--profile-bg-custom-color);"
